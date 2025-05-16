@@ -29,7 +29,8 @@ import java.util.Date;
 @PersistJobDataAfterExecution
 public class SampleJobQuartzJob extends BaseQuartzJob {
 
-    private final Job sampleBatchJob;
+    private final Job sampleTaskletJob;
+    private final Job sampleChunkJob;
 
     private final JobLauncher jobLauncher;
 
@@ -50,8 +51,11 @@ public class SampleJobQuartzJob extends BaseQuartzJob {
             JobParameters jobParameters = createJobParameters();
 
             // Spring Batch Job 실행
-            log.info("Launching Spring Batch Job: {}", sampleBatchJob.getName());
-            jobLauncher.run(sampleBatchJob, jobParameters);
+            log.info("Launching Spring Batch Job: {}", sampleTaskletJob.getName());
+            jobLauncher.run(sampleTaskletJob, jobParameters);
+
+            log.info("Launching Spring Batch Job: {}", sampleChunkJob.getName());
+            jobLauncher.run(sampleChunkJob, jobParameters);
 
             log.info("===== Quartz Job [{}] completed =====", jobKey);
         } catch (JobExecutionAlreadyRunningException | JobRestartException |
