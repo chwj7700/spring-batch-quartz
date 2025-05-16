@@ -1,0 +1,10 @@
+/logs/batch.log
+/logs/application.log
+/logs/json/application.json
+/logs/error.log
+/.idea/encodings.xml
+/.idea/jarRepositories.xml
+/target/
+/.idea/vcs.xml
+/.idea/
+/logs/

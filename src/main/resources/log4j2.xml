@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN" monitorInterval="30" packages="com.example.batch.util.logging">
+    <Properties>
+        <Property name="LOG_PATTERN">%d{yyyy-MM-dd HH:mm:ss.SSS} %5p ${hostName} --- [%15.15t] [%X{JOB_ID}] [%X{STEP_ID}] %-40.40c{1.} : %m%n%ex</Property>
+        <Property name="LOG_PATTERN_JSON">{"timestamp":"%d{yyyy-MM-dd HH:mm:ss.SSS}","level":"%p","thread":"%t","job":"%X{JOB_ID}","step":"%X{STEP_ID}","class":"%c{1.}","message":"%m"}%n</Property>
+        <Property name="APP_LOG_ROOT">${sys:LOG_PATH:-logs}</Property>
+    </Properties>
+
+    <Appenders>
+        <!-- 콘솔 로그 -->
+        <Console name="Console" target="SYSTEM_OUT">
+            <PatternLayout pattern="${LOG_PATTERN}"/>
+        </Console>
+
+        <!-- 애플리케이션 로그 -->
+        <RollingFile name="AppLog"
+                     fileName="${APP_LOG_ROOT}/application.log"
+                     filePattern="${APP_LOG_ROOT}/application-%d{yyyy-MM-dd}-%i.log">
+            <PatternLayout pattern="${LOG_PATTERN}" />
+            <Policies>
+                <SizeBasedTriggeringPolicy size="10MB" />
+                <TimeBasedTriggeringPolicy interval="1" />
+            </Policies>
+            <DefaultRolloverStrategy max="30"/>
+        </RollingFile>
+
+        <!-- 배치 작업 로그 -->
+        <RollingFile name="BatchLog"
+                     fileName="${APP_LOG_ROOT}/batch.log"
+                     filePattern="${APP_LOG_ROOT}/batch-%d{yyyy-MM-dd}-%i.log">
+            <PatternLayout pattern="${LOG_PATTERN}" />
+            <Policies>
+                <SizeBasedTriggeringPolicy size="10MB" />
+                <TimeBasedTriggeringPolicy interval="1" />
+            </Policies>
+            <DefaultRolloverStrategy max="30"/>
+        </RollingFile>
+
+        <!-- 에러 로그 -->
+        <RollingFile name="ErrorLog"
+                     fileName="${APP_LOG_ROOT}/error.log"
+                     filePattern="${APP_LOG_ROOT}/error-%d{yyyy-MM-dd}-%i.log">
+            <PatternLayout pattern="${LOG_PATTERN}" />
+            <Policies>
+                <SizeBasedTriggeringPolicy size="10MB" />
+                <TimeBasedTriggeringPolicy interval="1" />
+            </Policies>
+            <DefaultRolloverStrategy max="30"/>
+            <Filters>
+                <ThresholdFilter level="ERROR" onMatch="ACCEPT" onMismatch="DENY"/>
+            </Filters>
+        </RollingFile>
+        
+        <!-- JSON 형식 로그 (ELK 스택 연동용) -->
+        <RollingFile name="JsonLog"
+                     fileName="${APP_LOG_ROOT}/json/application.json"
+                     filePattern="${APP_LOG_ROOT}/json/application-%d{yyyy-MM-dd}-%i.json">
+            <PatternLayout pattern="${LOG_PATTERN_JSON}" />
+            <Policies>
+                <SizeBasedTriggeringPolicy size="10MB" />
+                <TimeBasedTriggeringPolicy interval="1" />
+            </Policies>
+            <DefaultRolloverStrategy max="30"/>
+        </RollingFile>
+        
+        <!-- 비동기 처리 -->
+        <Async name="AsyncAppLog">
+            <AppenderRef ref="AppLog"/>
+        </Async>
+        
+        <Async name="AsyncBatchLog">
+            <AppenderRef ref="BatchLog"/>
+        </Async>
+        
+        <Async name="AsyncErrorLog">
+            <AppenderRef ref="ErrorLog"/>
+        </Async>
+        
+        <Async name="AsyncJsonLog">
+            <AppenderRef ref="JsonLog"/>
+        </Async>
+    </Appenders>
+
+    <Loggers>
+        <!-- 애플리케이션 로거 -->
+        <Logger name="com.example.batch" level="info" additivity="false">
+            <AppenderRef ref="AsyncAppLog" />
+            <AppenderRef ref="AsyncErrorLog" />
+            <AppenderRef ref="AsyncJsonLog" />
+            <AppenderRef ref="Console" />
+        </Logger>
+
+        <!-- 배치 작업 로거 -->
+        <Logger name="org.springframework.batch" level="info" additivity="false">
+            <AppenderRef ref="AsyncBatchLog" />
+            <AppenderRef ref="AsyncErrorLog" />
+            <AppenderRef ref="Console" />
+        </Logger>
+
+        <!-- Quartz 로거 -->
+        <Logger name="org.quartz" level="info" additivity="false">
+            <AppenderRef ref="AsyncBatchLog" />
+            <AppenderRef ref="AsyncErrorLog" />
+            <AppenderRef ref="Console" />
+        </Logger>
+
+        <!-- MyBatis 로거 -->
+        <Logger name="org.mybatis" level="info" additivity="false">
+            <AppenderRef ref="AsyncAppLog" />
+            <AppenderRef ref="AsyncErrorLog" />
+            <AppenderRef ref="Console" />
+        </Logger>
+
+        <!-- SQL 로그 -->
+        <Logger name="org.mybatis.spring.SqlSessionTemplate" level="info" additivity="false">
+            <AppenderRef ref="AsyncAppLog" />
+            <AppenderRef ref="Console" />
+        </Logger>
+        
+        <Root level="warn">
+            <AppenderRef ref="Console" />
+            <AppenderRef ref="AsyncAppLog" />
+            <AppenderRef ref="AsyncErrorLog" />
+        </Root>
+    </Loggers>
+</Configuration> 

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.batch.mapper.SampleMapper">
+    <!-- 샘플 쿼리 - Oracle 구문 -->
+    <select id="selectSampleData" resultType="java.util.Map">
+        SELECT * FROM SAMPLE_TABLE 
+        WHERE ROWNUM &lt;= 100
+    </select>
+</mapper> 
