@@ -1,6 +1,7 @@
 package com.example.batch.quartz;
 
 import com.example.batch.exception.BatchException;
+import com.example.batch.util.BatchJobUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.quartz.DisallowConcurrentExecution;
@@ -15,6 +16,7 @@ import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.batch.core.repository.JobExecutionAlreadyRunningException;
 import org.springframework.batch.core.repository.JobInstanceAlreadyCompleteException;
 import org.springframework.batch.core.repository.JobRestartException;
+import org.springframework.scheduling.quartz.QuartzJobBean;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
@@ -27,7 +29,7 @@ import java.util.Date;
 @RequiredArgsConstructor
 @DisallowConcurrentExecution
 @PersistJobDataAfterExecution
-public class SampleJobQuartzJob extends BaseQuartzJob {
+public class SampleJobQuartzJob extends QuartzJobBean {
 
     private final Job sampleTaskletJob;
     private final Job sampleChunkJob;
@@ -48,13 +50,13 @@ public class SampleJobQuartzJob extends BaseQuartzJob {
 
         try {
             // Job 파라미터 생성 - 매번 다른 파라미터를 주어 중복 실행이 가능하도록 함
-            JobParameters jobParameters = createJobParameters();
-
             // Spring Batch Job 실행
             log.info("Launching Spring Batch Job: {}", sampleTaskletJob.getName());
+            JobParameters jobParameters = BatchJobUtils.createJobParameters(sampleTaskletJob.getName());
             jobLauncher.run(sampleTaskletJob, jobParameters);
 
             log.info("Launching Spring Batch Job: {}", sampleChunkJob.getName());
+            jobParameters = BatchJobUtils.createJobParameters(sampleChunkJob.getName());
             jobLauncher.run(sampleChunkJob, jobParameters);
 
             log.info("===== Quartz Job [{}] completed =====", jobKey);
